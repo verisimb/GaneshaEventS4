@@ -13,13 +13,15 @@ class TiketController extends Controller
     {
         $tikets = Pendaftaran::query()
             ->where('user_id', $request->user()->id)
-            ->with(['kegiatan:id,judul,tanggal,waktu,lokasi,banner,is_berbayar'])
+            ->with(['kegiatan:id,judul,tanggal,waktu,lokasi,banner,is_berbayar,is_selesai'])
             ->latest()
             ->get()
             ->map(fn (Pendaftaran $p) => [
                 'id' => $p->id,
                 'nama_lengkap' => $p->nama_lengkap,
                 'status' => $p->status,
+                'ticket_code' => $p->ticket_code,
+                'is_attended' => $p->is_attended,
                 'kegiatan' => [
                     'id' => $p->kegiatan->id,
                     'judul' => $p->kegiatan->judul,
@@ -30,6 +32,7 @@ class TiketController extends Controller
                         ? asset('storage/'.$p->kegiatan->banner)
                         : null,
                     'is_berbayar' => $p->kegiatan->is_berbayar,
+                    'is_selesai' => $p->kegiatan->is_selesai,
                 ],
             ]);
 
