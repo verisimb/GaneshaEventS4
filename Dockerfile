@@ -18,6 +18,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 RUN cp .env.example .env
+RUN mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
 RUN APP_KEY='base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' php artisan wayfinder:generate --with-form --no-interaction
 RUN npm ci && WAYFINDER_DISABLED=1 npm run build
 
