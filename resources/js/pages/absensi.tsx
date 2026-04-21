@@ -1,11 +1,12 @@
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { absensi } from '@/routes';
 import {
     Camera,
     CameraOff,
     CheckCircle2,
-    ChevronDown,
     Clock,
+    Keyboard,
+    Loader2,
     ScanLine,
     Users,
     XCircle,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Kegiatan = {
@@ -226,12 +228,61 @@ function PesertaList({ kegiatanId }: { kegiatanId: number | null }) {
     );
 }
 
+// ---------- Manual Input Component ----------
+function ManualInput({
+    onSubmit,
+    loading,
+}: {
+    onSubmit: (code: string) => Promise<void>;
+    loading: boolean;
+}) {
+    const [value, setValue] = useState('');
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        const trimmed = value.trim();
+        if (!trimmed) return;
+        await onSubmit(trimmed);
+        setValue('');
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            <div className="space-y-1.5">
+                <label htmlFor="manual-code" className="text-xs font-medium">
+                    Kode Tiket
+                </label>
+                <div className="flex gap-2">
+                    <Input
+                        id="manual-code"
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        placeholder="Tempel atau ketik kode tiket (UUID)…"
+                        className="font-mono text-xs"
+                        disabled={loading}
+                        autoComplete="off"
+                        autoFocus
+                    />
+                    <Button type="submit" size="sm" disabled={loading || !value.trim()} className="shrink-0">
+                        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Verifikasi'}
+                    </Button>
+                </div>
+            </div>
+            <p className="text-muted-foreground text-[11px]">
+                Masukkan kode UUID yang tertera di bagian bawah QR Code pada tiket peserta.
+            </p>
+        </form>
+    );
+}
+
 // ---------- Main Page ----------
 export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
     const [selectedId, setSelectedId] = useState<number | null>(null);
     const [scanning, setScanning] = useState(false);
+    const [scanMode, setScanMode] = useState<'qr' | 'manual'>('qr');
+    const [manualLoading, setManualLoading] = useState(false);
     const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-    const [pesertaKey, setPesertaKey] = useState(0); // force refresh peserta list
+    const [pesertaKey, setPesertaKey] = useState(0);
 
     const selectedKegiatan = kegiatans.find((k) => k.id === selectedId) ?? null;
 
@@ -269,6 +320,13 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                 message: 'Gagal terhubung ke server. Silakan coba lagi.',
             });
         }
+    }
+
+    async function handleManual(code: string) {
+        setManualLoading(true);
+        setScanResult(null);
+        await handleScan(code);
+        setManualLoading(false);
     }
 
     function handleSelectKegiatan(val: string) {
@@ -317,51 +375,103 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                 {/* Scanner area */}
                 {selectedId && (
                     <div className="border-sidebar-border/70 dark:border-sidebar-border flex flex-col gap-4 rounded-xl border p-4">
+                        {/* Tab toggle: QR vs Manual */}
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <ScanLine className="text-muted-foreground h-4 w-4" />
-                                <span className="text-sm font-medium">Scanner QR</span>
+                            <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
+                                <button
+                                    onClick={() => {
+                                        setScanMode('qr');
+                                        setScanResult(null);
+                                    }}
+                                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                                        scanMode === 'qr'
+                                            ? 'bg-background text-foreground shadow-sm'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    <ScanLine className="h-3.5 w-3.5" />
+                                    Scan QR
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setScanMode('manual');
+                                        setScanning(false);
+                                        setScanResult(null);
+                                    }}
+                                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                                        scanMode === 'manual'
+                                            ? 'bg-background text-foreground shadow-sm'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                    }`}
+                                >
+                                    <Keyboard className="h-3.5 w-3.5" />
+                                    Input Manual
+                                </button>
                             </div>
-                            <Button
-                                variant={scanning ? 'destructive' : 'default'}
-                                size="sm"
-                                className="gap-1.5"
-                                onClick={() => {
-                                    setScanning((s) => !s);
-                                    setScanResult(null);
-                                }}
-                            >
-                                {scanning ? (
-                                    <>
-                                        <CameraOff className="h-3.5 w-3.5" />
-                                        Stop Kamera
-                                    </>
-                                ) : (
-                                    <>
-                                        <Camera className="h-3.5 w-3.5" />
-                                        Mulai Scan
-                                    </>
-                                )}
-                            </Button>
-                        </div>
 
-                        {/* Preview kamera */}
-                        <div className="relative overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
-                            {!scanning && (
-                                <div className="flex min-h-[220px] flex-col items-center justify-center gap-2">
-                                    <ScanLine className="text-muted-foreground/40 h-12 w-12" />
-                                    <p className="text-muted-foreground text-xs">Tekan "Mulai Scan" untuk membuka kamera.</p>
-                                </div>
+                            {/* Tombol kamera hanya muncul di mode QR */}
+                            {scanMode === 'qr' && (
+                                <Button
+                                    variant={scanning ? 'destructive' : 'default'}
+                                    size="sm"
+                                    className="gap-1.5"
+                                    onClick={() => {
+                                        setScanning((s) => !s);
+                                        setScanResult(null);
+                                    }}
+                                >
+                                    {scanning ? (
+                                        <>
+                                            <CameraOff className="h-3.5 w-3.5" />
+                                            Stop Kamera
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Camera className="h-3.5 w-3.5" />
+                                            Mulai Scan
+                                        </>
+                                    )}
+                                </Button>
                             )}
-                            <QRScanner
-                                kegiatanId={selectedId}
-                                onScan={handleScan}
-                                active={scanning}
-                                onStop={() => setScanning(false)}
-                            />
                         </div>
 
-                        {/* Scan result */}
+                        {/* Mode: QR Scanner */}
+                        {scanMode === 'qr' && (
+                            <div className="relative overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
+                                {!scanning && (
+                                    <div className="flex min-h-[220px] flex-col items-center justify-center gap-2">
+                                        <ScanLine className="text-muted-foreground/40 h-12 w-12" />
+                                        <p className="text-muted-foreground text-xs">
+                                            Tekan "Mulai Scan" untuk membuka kamera.
+                                        </p>
+                                        <button
+                                            onClick={() => {
+                                                setScanMode('manual');
+                                                setScanResult(null);
+                                            }}
+                                            className="text-primary mt-1 text-xs underline-offset-2 hover:underline"
+                                        >
+                                            Kamera bermasalah? Input manual →
+                                        </button>
+                                    </div>
+                                )}
+                                <QRScanner
+                                    kegiatanId={selectedId}
+                                    onScan={handleScan}
+                                    active={scanning}
+                                    onStop={() => setScanning(false)}
+                                />
+                            </div>
+                        )}
+
+                        {/* Mode: Manual Input */}
+                        {scanMode === 'manual' && (
+                            <div className="rounded-xl bg-muted/40 p-4">
+                                <ManualInput onSubmit={handleManual} loading={manualLoading} />
+                            </div>
+                        )}
+
+                        {/* Scan/verify result */}
                         <ScanToast result={scanResult} onDismiss={() => setScanResult(null)} />
                     </div>
                 )}
