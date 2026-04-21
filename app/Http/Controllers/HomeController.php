@@ -38,4 +38,26 @@ class HomeController extends Controller
             'upcomingEvents' => $upcomingEvents,
         ]);
     }
+
+    public function show(Kegiatan $kegiatan): Response
+    {
+        return Inertia::render('kegiatan-public', [
+            'canRegister' => Features::enabled(Features::registration()),
+            'kegiatan' => [
+                'id' => $kegiatan->id,
+                'judul' => $kegiatan->judul,
+                'deskripsi' => $kegiatan->deskripsi,
+                'tanggal' => $kegiatan->tanggal?->translatedFormat('d M Y'),
+                'waktu' => $kegiatan->waktu ? substr($kegiatan->waktu, 0, 5) : null,
+                'lokasi' => $kegiatan->lokasi,
+                'penyelenggara' => $kegiatan->penyelenggara,
+                'is_berbayar' => $kegiatan->is_berbayar,
+                'harga' => $kegiatan->harga,
+                'nama_bank' => $kegiatan->nama_bank,
+                'no_rekening' => $kegiatan->no_rekening,
+                'atas_nama' => $kegiatan->atas_nama,
+                'banner_url' => $kegiatan->banner ? asset('storage/'.$kegiatan->banner) : null,
+            ],
+        ]);
+    }
 }
