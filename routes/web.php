@@ -2,17 +2,15 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\UserKegiatanController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
-Route::inertia('/', 'welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
+Route::get('/', HomeController::class)->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('user/kegiatan', [UserKegiatanController::class, '__invoke'])->name('user.kegiatan');
