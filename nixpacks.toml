@@ -1,7 +1,4 @@
-[providers]
-  # Menggunakan PHP sebagai provider utama dan Node untuk proses build (Vite/Inertia)
-  php = true
-  node = true
+providers = ["php", "node"]
 
 [phases.setup]
   nixPkgs = ["php84", "php84Packages.composer", "nodejs_20"]
@@ -16,7 +13,3 @@
   cmds = [
     "npm run build"
   ]
-
-[start]
-  # Biarkan kosong agar Nixpacks memakai perintah default PHP-FPM + Nginx (Nginx akan ditangani sepenuhnya oleh Nixpacks Laravel template).
-  # Ini mencegah issue duplicate location block Nginx.
