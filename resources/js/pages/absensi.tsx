@@ -438,6 +438,7 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                         {/* Mode: QR Scanner */}
                         {scanMode === 'qr' && (
                             <div className="relative overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
+                                {/* Idle state */}
                                 {!scanning && (
                                     <div className="flex min-h-[220px] flex-col items-center justify-center gap-2">
                                         <ScanLine className="text-muted-foreground/40 h-12 w-12" />
@@ -455,12 +456,44 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                                         </button>
                                     </div>
                                 )}
+
                                 <QRScanner
                                     kegiatanId={selectedId}
                                     onScan={handleScan}
                                     active={scanning}
                                     onStop={() => setScanning(false)}
                                 />
+
+                                {/* Overlay hasil scan di dalam kamera */}
+                                {scanning && scanResult && (
+                                    <div
+                                        className={`absolute inset-0 flex flex-col items-center justify-center gap-3 backdrop-blur-sm transition-opacity duration-300 ${
+                                            scanResult.success
+                                                ? 'bg-emerald-500/80'
+                                                : scanResult.already_attended
+                                                  ? 'bg-amber-500/80'
+                                                  : 'bg-red-500/80'
+                                        }`}
+                                    >
+                                        {scanResult.success ? (
+                                            <CheckCircle2 className="h-16 w-16 text-white drop-shadow" />
+                                        ) : scanResult.already_attended ? (
+                                            <Clock className="h-16 w-16 text-white drop-shadow" />
+                                        ) : (
+                                            <XCircle className="h-16 w-16 text-white drop-shadow" />
+                                        )}
+                                        <div className="text-center">
+                                            {scanResult.nama_lengkap && (
+                                                <p className="text-lg font-bold text-white drop-shadow">
+                                                    {scanResult.nama_lengkap}
+                                                </p>
+                                            )}
+                                            <p className="mt-0.5 text-sm font-medium text-white/90 drop-shadow">
+                                                {scanResult.message}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -471,8 +504,10 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                             </div>
                         )}
 
-                        {/* Scan/verify result */}
-                        <ScanToast result={scanResult} onDismiss={() => setScanResult(null)} />
+                        {/* Toast teks: hanya di mode manual (mode QR pakai overlay di dalam kamera) */}
+                        {scanMode === 'manual' && (
+                            <ScanToast result={scanResult} onDismiss={() => setScanResult(null)} />
+                        )}
                     </div>
                 )}
 
