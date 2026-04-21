@@ -85,7 +85,7 @@ class SertifikatController extends Controller
             function ($font) use ($fontPath, $width) {
                 $font->file($fontPath);
                 $font->size((int) ($width * 0.045)); // ~4.5% lebar gambar
-                $font->color([30, 30, 30]);           // hampir hitam
+                $font->color('#1e1e1e');              // hampir hitam (hex, bukan array)
                 $font->align('center');
                 $font->valign('middle');
             }
