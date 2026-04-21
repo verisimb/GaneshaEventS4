@@ -1,17 +1,34 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { CalendarDays, MapPin, ArrowRight, Ticket, Users, Award, ImageOff } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
+import {
+    CalendarDays,
+    MapPin,
+    ArrowRight,
+    Ticket,
+    ImageOff,
+    CreditCard,
+    LogIn,
+    UserPlus,
+    X,
+} from 'lucide-react';
 import { login, register } from '@/routes';
-import { show as kegiatanShow } from '@/actions/App/Http/Controllers/UserKegiatanController';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type KegiatanPreview = {
     id: number;
     judul: string;
+    deskripsi: string | null;
     tanggal: string | null;
     waktu: string | null;
     lokasi: string;
     penyelenggara: string;
     is_berbayar: boolean;
     harga: number | null;
+    nama_bank: string | null;
+    no_rekening: string | null;
+    atas_nama: string | null;
     banner_url: string | null;
 };
 
@@ -23,29 +40,176 @@ function formatRupiah(amount: number): string {
     }).format(amount);
 }
 
-function EventCard({ kegiatan }: { kegiatan: KegiatanPreview }) {
+/* ─── Dialog Detail Kegiatan ──────────────────────────────────── */
+function KegiatanDetailDialog({
+    kegiatan,
+    open,
+    onClose,
+    canRegister,
+}: {
+    kegiatan: KegiatanPreview | null;
+    open: boolean;
+    onClose: () => void;
+    canRegister: boolean;
+}) {
+    if (!kegiatan) return null;
+
     return (
-        <a
-    href={kegiatanShow.url(kegiatan.id)}
-            className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10 hover:shadow-xl hover:shadow-black/20"
+        <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+            <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto p-0">
+                <div className="flex flex-col gap-0 lg:flex-row">
+                    {/* Kolom Kiri: Info Kegiatan */}
+                    <div className="flex-1 space-y-5 p-6">
+                        {/* Banner */}
+                        <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted">
+                            {kegiatan.banner_url ? (
+                                <img
+                                    src={kegiatan.banner_url}
+                                    alt={kegiatan.judul}
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/50">
+                                    <ImageOff className="h-10 w-10" />
+                                    <span className="text-xs">Tidak ada banner</span>
+                                </div>
+                            )}
+                            <div className="absolute top-3 left-3">
+                                {kegiatan.is_berbayar ? (
+                                    <span className="rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                                        💳 {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
+                                    </span>
+                                ) : (
+                                    <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                                        🎟️ Gratis
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Judul & Penyelenggara */}
+                        <div>
+                            <h2 className="text-xl font-bold tracking-tight">{kegiatan.judul}</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Diselenggarakan oleh:{' '}
+                                <span className="font-semibold text-foreground">{kegiatan.penyelenggara}</span>
+                            </p>
+                        </div>
+
+                        {/* Meta waktu & lokasi */}
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+                                <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                                <div>
+                                    <p className="text-sm font-medium">Tanggal & Waktu</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {kegiatan.tanggal}
+                                        {kegiatan.waktu && <><br />{kegiatan.waktu} WITA</>}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+                                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                                <div>
+                                    <p className="text-sm font-medium">Lokasi</p>
+                                    <p className="mt-1 text-sm text-muted-foreground">{kegiatan.lokasi}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Deskripsi */}
+                        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                            <h3 className="mb-3 text-sm font-semibold">Deskripsi Kegiatan</h3>
+                            {kegiatan.deskripsi ? (
+                                <div
+                                    className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground"
+                                    dangerouslySetInnerHTML={{ __html: kegiatan.deskripsi }}
+                                />
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    Belum ada deskripsi.
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Info Pembayaran */}
+                        {kegiatan.is_berbayar && (
+                            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 dark:border-amber-500/20 dark:bg-amber-500/5">
+                                <div className="mb-3 flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-400">
+                                    <CreditCard className="h-5 w-5" />
+                                    Informasi Pembayaran
+                                </div>
+                                <div className="space-y-1 text-sm text-amber-800 dark:text-amber-200">
+                                    <p>Total Tagihan: <strong className="text-lg">{kegiatan.harga ? formatRupiah(kegiatan.harga) : '-'}</strong></p>
+                                    <p>Bank: <strong>{kegiatan.nama_bank || '-'}</strong></p>
+                                    <p>Rekening: <strong>{kegiatan.no_rekening || '-'}</strong></p>
+                                    <p>Atas nama: <strong>{kegiatan.atas_nama || '-'}</strong></p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Kolom Kanan: CTA Login/Register */}
+                    <div className="w-full lg:w-80 lg:border-l lg:border-border">
+                        <div className="sticky top-0 p-6">
+                            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+                                <div className="border-b border-border bg-muted/40 px-6 py-4">
+                                    <h3 className="text-base font-semibold">Ingin Bergabung?</h3>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Masuk atau daftar untuk mendaftarkan diri
+                                    </p>
+                                </div>
+                                <div className="space-y-3 p-6">
+                                    <Link href={login()} className="block">
+                                        <Button className="w-full gap-2">
+                                            <LogIn className="h-4 w-4" />
+                                            Masuk ke Akun
+                                        </Button>
+                                    </Link>
+                                    {canRegister && (
+                                        <Link href={register()} className="block">
+                                            <Button variant="outline" className="w-full gap-2">
+                                                <UserPlus className="h-4 w-4" />
+                                                Daftar Akun Baru
+                                            </Button>
+                                        </Link>
+                                    )}
+                                    <p className="text-center text-[10px] text-muted-foreground">
+                                        Sudah memiliki akun? Masuk untuk mendaftar ke kegiatan ini.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+/* ─── Event Card ────────────────────────────────────────────────── */
+function EventCard({ kegiatan, onClick }: { kegiatan: KegiatanPreview; onClick: () => void }) {
+    return (
+        <button
+            onClick={onClick}
+            className="group flex w-full flex-col overflow-hidden rounded-xl border border-sidebar-border/70 bg-card text-left shadow-sm transition-shadow hover:shadow-md dark:border-sidebar-border"
         >
-            {/* Banner */}
-            <div className="relative aspect-video overflow-hidden bg-white/5">
+            <div className="relative aspect-video w-full overflow-hidden bg-muted">
                 {kegiatan.banner_url ? (
                     <img
                         src={kegiatan.banner_url}
                         alt={kegiatan.judul}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                        <ImageOff className="h-10 w-10 opacity-20 text-white" />
+                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/40">
+                        <ImageOff className="h-8 w-8" />
+                        <span className="text-xs">Tidak ada banner</span>
                     </div>
                 )}
-                {/* Badge */}
-                <div className="absolute top-3 left-3">
+                <div className="absolute top-2.5 left-2.5">
                     {kegiatan.is_berbayar ? (
-                        <span className="rounded-full bg-amber-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                        <span className="rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                             💳 {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
                         </span>
                     ) : (
@@ -56,45 +220,33 @@ function EventCard({ kegiatan }: { kegiatan: KegiatanPreview }) {
                 </div>
             </div>
 
-            {/* Info */}
-            <div className="flex flex-1 flex-col p-4">
-                <h3 className="line-clamp-2 text-sm font-semibold text-white leading-snug">
-                    {kegiatan.judul}
-                </h3>
-                <p className="mt-1 text-xs text-white/50 line-clamp-1">{kegiatan.penyelenggara}</p>
+            <div className="flex flex-1 flex-col gap-2 p-4">
+                <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{kegiatan.judul}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-1">{kegiatan.penyelenggara}</p>
 
-                <div className="mt-3 space-y-1.5">
+                <div className="mt-1 space-y-1">
                     {kegiatan.tanggal && (
-                        <div className="flex items-center gap-1.5 text-xs text-white/60">
+                        <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                             <CalendarDays className="h-3.5 w-3.5 shrink-0" />
                             <span>{kegiatan.tanggal}{kegiatan.waktu && `, ${kegiatan.waktu} WITA`}</span>
                         </div>
                     )}
-                    <div className="flex items-center gap-1.5 text-xs text-white/60">
+                    <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                         <MapPin className="h-3.5 w-3.5 shrink-0" />
                         <span className="line-clamp-1">{kegiatan.lokasi}</span>
                     </div>
                 </div>
 
-                <div className="mt-4 flex items-center gap-1 text-xs font-medium text-indigo-400 transition-colors group-hover:text-indigo-300">
-                    Daftar Sekarang
+                <div className="mt-2 flex items-center gap-1 text-xs font-medium text-primary">
+                    Lihat Detail
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                 </div>
             </div>
-        </a>
+        </button>
     );
 }
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-    return (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
-            <div className="rounded-xl bg-indigo-500/20 p-3 text-indigo-400">{icon}</div>
-            <p className="text-2xl font-bold text-white">{value}</p>
-            <p className="text-xs text-white/60">{label}</p>
-        </div>
-    );
-}
-
+/* ─── Main Welcome Page ─────────────────────────────────────────── */
 export default function Welcome({
     canRegister = true,
     upcomingEvents = [],
@@ -102,188 +254,116 @@ export default function Welcome({
     canRegister?: boolean;
     upcomingEvents?: KegiatanPreview[];
 }) {
-    const { auth } = usePage().props as { auth: { user: { role: string } | null } };
-
-    const dashboardHref = auth.user?.role === 'organizer'
-        ? '/dashboard'
-        : '/user/kegiatan';
+    const [selectedKegiatan, setSelectedKegiatan] = useState<KegiatanPreview | null>(null);
 
     return (
         <>
-            <Head title="Ganesha Event — Platform Event Kampus" />
+            <Head title="Ganesha Event — Platform Event Kampus">
+                <meta name="description" content="Platform event kampus Ganesha. Temukan dan daftarkan diri ke berbagai kegiatan seminar, workshop, dan kompetisi." />
+            </Head>
 
-            <div className="min-h-screen bg-[#0f0f1a] text-white selection:bg-indigo-500/30">
-                {/* ===== NAVBAR ===== */}
-                <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0f0f1a]/80 backdrop-blur-xl">
+            <div className="bg-background text-foreground min-h-screen">
+                {/* ── Navbar ── */}
+                <header className="border-b border-border/60 bg-background/95 backdrop-blur-sm sticky top-0 z-40">
                     <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                        {/* Logo */}
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-                                <Ticket className="h-4 w-4 text-white" />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                                <Ticket className="h-4 w-4 text-primary-foreground" />
                             </div>
-                            <span className="text-sm font-bold tracking-tight">Ganesha Event</span>
+                            <span className="text-sm font-bold">Ganesha Event</span>
                         </div>
-
-                        {/* Nav links */}
                         <nav className="flex items-center gap-2">
-                            {auth.user ? (
-                                <a
-                                    href={dashboardHref}
-                                    className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-                                >
-                                    {auth.user.role === 'organizer' ? 'Dashboard' : 'Kegiatan Saya'}
-                                </a>
-                            ) : (
-                                <>
-                                    <Link
-                                        href={login()}
-                                        className="rounded-lg px-4 py-1.5 text-sm font-medium text-white/70 transition-colors hover:text-white"
-                                    >
-                                        Masuk
-                                    </Link>
-                                    {canRegister && (
-                                        <Link
-                                            href={register()}
-                                            className="rounded-lg bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-                                        >
-                                            Daftar
-                                        </Link>
-                                    )}
-                                </>
+                            <Link href={login()}>
+                                <Button variant="ghost" size="sm" className="gap-1.5">
+                                    <LogIn className="h-3.5 w-3.5" />
+                                    Masuk
+                                </Button>
+                            </Link>
+                            {canRegister && (
+                                <Link href={register()}>
+                                    <Button size="sm" className="gap-1.5">
+                                        <UserPlus className="h-3.5 w-3.5" />
+                                        Daftar
+                                    </Button>
+                                </Link>
                             )}
                         </nav>
                     </div>
                 </header>
 
-                {/* ===== HERO ===== */}
-                <section className="relative overflow-hidden px-4 py-24 text-center">
-                    {/* Background blobs */}
-                    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                        <div className="absolute -top-40 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-indigo-600/10 blur-[120px]" />
-                        <div className="absolute top-20 right-0 h-[300px] w-[300px] rounded-full bg-purple-600/10 blur-[100px]" />
-                        <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-full bg-cyan-600/8 blur-[100px]" />
-                    </div>
-
-                    <div className="relative mx-auto max-w-3xl">
-                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-4 py-1.5 text-xs font-medium text-indigo-400">
-                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-indigo-400" />
+                {/* ── Hero ── */}
+                <section className="border-b border-border/40 px-4 py-16 text-center">
+                    <div className="mx-auto max-w-2xl">
+                        <Badge variant="secondary" className="mb-4">
                             Platform Event Kampus Ganesha
-                        </div>
-
-                        <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                            Satu Platform untuk{' '}
-                            <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                Semua Event
-                            </span>{' '}
-                            Kampus
+                        </Badge>
+                        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+                            Temukan Event Kampus
+                            <br />
+                            <span className="text-primary">yang Tepat untuk Kamu</span>
                         </h1>
-
-                        <p className="mx-auto mb-8 max-w-xl text-base text-white/60 sm:text-lg">
-                            Temukan, daftarkan diri, dan kelola kegiatan kampus dengan mudah — mulai dari seminar,
-                            workshop, hingga kompetisi, semua ada di sini.
+                        <p className="mx-auto mt-4 max-w-lg text-sm text-muted-foreground sm:text-base">
+                            Seminar, workshop, kompetisi, dan berbagai kegiatan kampus ada di satu tempat.
+                            Daftar akun dan mulai ikut sekarang.
                         </p>
-
-                        <div className="flex flex-wrap items-center justify-center gap-3">
-                            {auth.user ? (
-                                <a
-                                    href="/user/kegiatan"
-                                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-700 hover:shadow-indigo-500/40"
-                                >
-                                    Jelajahi Kegiatan
-                                    <ArrowRight className="h-4 w-4" />
-                                </a>
-                            ) : (
-                                <>
-                                    {canRegister && (
-                                        <Link
-                                            href={register()}
-                                            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-700 hover:shadow-indigo-500/40"
-                                        >
-                                            Mulai Sekarang
-                                            <ArrowRight className="h-4 w-4" />
-                                        </Link>
-                                    )}
-                                    <Link
-                                        href={login()}
-                                        className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 transition-all hover:border-white/30 hover:text-white"
-                                    >
-                                        Sudah punya akun? Masuk
-                                    </Link>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </section>
-
-                {/* ===== STATS ===== */}
-                <section className="px-4 pb-16">
-                    <div className="mx-auto grid max-w-3xl grid-cols-3 gap-4">
-                        <StatCard icon={<Ticket className="h-5 w-5" />} label="Event Tersedia" value={String(upcomingEvents.length || '—')} />
-                        <StatCard icon={<Users className="h-5 w-5" />} label="Terbuka untuk Umum" value="✓" />
-                        <StatCard icon={<Award className="h-5 w-5" />} label="Sertifikat Digital" value="✓" />
-                    </div>
-                </section>
-
-                {/* ===== UPCOMING EVENTS ===== */}
-                {upcomingEvents.length > 0 && (
-                    <section className="px-4 pb-24">
-                        <div className="mx-auto max-w-6xl">
-                            <div className="mb-8 flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-2xl font-bold">Kegiatan Mendatang</h2>
-                                    <p className="mt-1 text-sm text-white/50">Event yang segera diselenggarakan</p>
-                                </div>
-                                <a
-                                    href="/user/kegiatan"
-                                    className="flex items-center gap-1 text-sm text-indigo-400 transition-colors hover:text-indigo-300"
-                                >
-                                    Lihat semua
-                                    <ArrowRight className="h-3.5 w-3.5" />
-                                </a>
-                            </div>
-
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                {upcomingEvents.map((k) => (
-                                    <EventCard key={k.id} kegiatan={k} />
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-                )}
-
-                {/* ===== CTA BANNER ===== */}
-                {!auth.user && (
-                    <section className="px-4 pb-24">
-                        <div className="mx-auto max-w-4xl rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-600/20 to-purple-600/10 p-10 text-center backdrop-blur-sm">
-                            <h2 className="mb-3 text-2xl font-bold">Siap bergabung?</h2>
-                            <p className="mb-6 text-sm text-white/60">
-                                Daftarkan diri sekarang dan mulai ikuti berbagai kegiatan seru di kampus.
-                            </p>
-                            <div className="flex flex-wrap justify-center gap-3">
-                                {canRegister && (
-                                    <Link
-                                        href={register()}
-                                        className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
-                                    >
+                        <div className="mt-6 flex flex-wrap justify-center gap-3">
+                            {canRegister && (
+                                <Link href={register()}>
+                                    <Button className="gap-2">
+                                        <UserPlus className="h-4 w-4" />
                                         Daftar Gratis
-                                    </Link>
-                                )}
-                                <Link
-                                    href={login()}
-                                    className="rounded-xl border border-white/15 px-6 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:border-white/30 hover:text-white"
-                                >
-                                    Masuk
+                                    </Button>
                                 </Link>
-                            </div>
+                            )}
+                            <Link href={login()}>
+                                <Button variant="outline" className="gap-2">
+                                    <LogIn className="h-4 w-4" />
+                                    Sudah punya akun? Masuk
+                                </Button>
+                            </Link>
                         </div>
-                    </section>
-                )}
+                    </div>
+                </section>
 
-                {/* ===== FOOTER ===== */}
-                <footer className="border-t border-white/5 px-4 py-6 text-center text-xs text-white/30">
-                    © {new Date().getFullYear()} Ganesha Event. Platform event kampus.
+                {/* ── Grid Kegiatan ── */}
+                <section className="mx-auto max-w-6xl px-4 py-12">
+                    <div className="mb-6">
+                        <h2 className="text-xl font-bold">Kegiatan Mendatang</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Klik kegiatan untuk melihat detail dan cara pendaftaran.
+                        </p>
+                    </div>
+
+                    {upcomingEvents.length === 0 ? (
+                        <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed border-border">
+                            <p className="text-sm text-muted-foreground">Belum ada kegiatan yang tersedia.</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {upcomingEvents.map((k) => (
+                                <EventCard
+                                    key={k.id}
+                                    kegiatan={k}
+                                    onClick={() => setSelectedKegiatan(k)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </section>
+
+                {/* ── Footer ── */}
+                <footer className="border-t border-border/40 px-4 py-6 text-center text-xs text-muted-foreground">
+                    © {new Date().getFullYear()} Ganesha Event — Platform Event Kampus
                 </footer>
             </div>
+
+            {/* ── Dialog Detail ── */}
+            <KegiatanDetailDialog
+                kegiatan={selectedKegiatan}
+                open={selectedKegiatan !== null}
+                onClose={() => setSelectedKegiatan(null)}
+                canRegister={canRegister}
+            />
         </>
     );
 }
