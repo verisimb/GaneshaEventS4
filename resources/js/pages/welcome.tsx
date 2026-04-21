@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { CalendarDays, MapPin, ArrowRight, Ticket, Users, Award, ImageOff } from 'lucide-react';
 import { login, register } from '@/routes';
-import { route as routeFn } from 'ziggy-js';
+import { show as kegiatanShow } from '@/actions/App/Http/Controllers/UserKegiatanController';
 
 type KegiatanPreview = {
     id: number;
@@ -26,7 +26,7 @@ function formatRupiah(amount: number): string {
 function EventCard({ kegiatan }: { kegiatan: KegiatanPreview }) {
     return (
         <a
-            href={routeFn('user.kegiatan.show', kegiatan.id)}
+    href={kegiatanShow.url(kegiatan.id)}
             className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10 hover:shadow-xl hover:shadow-black/20"
         >
             {/* Banner */}
