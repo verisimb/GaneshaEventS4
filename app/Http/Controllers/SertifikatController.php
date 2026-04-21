@@ -74,12 +74,16 @@ class SertifikatController extends Controller
         $width = $image->width();
         $height = $image->height();
 
+        $fontPath = resource_path('fonts/Roboto-Regular.ttf');
+        abort_if(! file_exists($fontPath), 500, 'Font file tidak ditemukan.');
+
         // Tulis nama peserta di tengah secara vertikal & horizontal
         $image->text(
             $pendaftaran->nama_lengkap,
             (int) ($width / 2),
             (int) ($height / 2),
-            function ($font) use ($width) {
+            function ($font) use ($fontPath, $width) {
+                $font->file($fontPath);
                 $font->size((int) ($width * 0.045)); // ~4.5% lebar gambar
                 $font->color([30, 30, 30]);           // hampir hitam
                 $font->align('center');
