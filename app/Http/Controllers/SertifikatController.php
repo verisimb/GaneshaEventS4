@@ -74,7 +74,7 @@ class SertifikatController extends Controller
         $width = $image->width();
         $height = $image->height();
 
-        $fontPath = resource_path('fonts/Roboto-Regular.ttf');
+        $fontPath = resource_path('fonts/Arial.ttf');
         abort_if(! file_exists($fontPath), 500, 'Font file tidak ditemukan.');
 
         // Tulis nama peserta di tengah secara vertikal & horizontal
