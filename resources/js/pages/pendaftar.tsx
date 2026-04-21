@@ -132,7 +132,7 @@ export default function Pendaftar({
     function handleFilterChange(value: string) {
         router.get(
             pendaftaranIndex.url(),
-            value ? { kegiatan_id: value } : {},
+            value && value !== 'all' ? { kegiatan_id: value } : {},
             { preserveState: true, replace: true },
         );
     }
@@ -175,14 +175,14 @@ export default function Pendaftar({
                 <div className="flex items-center gap-2">
                     <Filter className="text-muted-foreground h-4 w-4 shrink-0" />
                     <Select
-                        value={selected_kegiatan_id ? String(selected_kegiatan_id) : ''}
+                        value={selected_kegiatan_id ? String(selected_kegiatan_id) : 'all'}
                         onValueChange={(value) => handleFilterChange(value)}
                     >
                         <SelectTrigger className="w-64">
                             <SelectValue placeholder="Semua Kegiatan" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">Semua Kegiatan</SelectItem>
+                            <SelectItem value="all">Semua Kegiatan</SelectItem>
                             {kegiatan_list.map((k) => (
                                 <SelectItem key={k.id} value={String(k.id)}>
                                     {k.judul}
