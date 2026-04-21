@@ -4,6 +4,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\PendaftaranController;
+use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\TiketController;
 use App\Http\Controllers\UserKegiatanController;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +19,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('user/kegiatan/{kegiatan}', [UserKegiatanController::class, 'show'])->name('user.kegiatan.show');
     Route::post('user/kegiatan/{kegiatan}/daftar', [PendaftaranController::class, 'store'])->name('user.pendaftaran.store');
     Route::get('user/tiket', TiketController::class)->name('user.tiket');
-    Route::inertia('user/sertifikat', 'user/sertifikat')->name('user.sertifikat');
+    Route::get('user/sertifikat', [SertifikatController::class, 'index'])->name('user.sertifikat');
+    Route::get('user/sertifikat/{pendaftaran}/download', [SertifikatController::class, 'download'])->name('user.sertifikat.download');
 });
 
 Route::middleware(['auth', 'verified', 'organizer'])->group(function () {
