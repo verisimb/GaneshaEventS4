@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { CheckCircle2, XCircle, Eye, Filter } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye } from 'lucide-react';
 import {
     confirm as pendaftaranConfirm,
     reject as pendaftaranReject,
@@ -159,7 +159,7 @@ export default function Pendaftar({
 
             <RejectDialog target={rejectTarget} open={rejectOpen} onOpenChange={setRejectOpen} />
 
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-xl font-semibold">Pendaftar</h1>
@@ -172,14 +172,14 @@ export default function Pendaftar({
                 </div>
 
                 {/* Filter */}
-                <div className="flex items-center gap-2">
-                    <Filter className="text-muted-foreground h-4 w-4 shrink-0" />
+                <div className="border-sidebar-border/70 dark:border-sidebar-border rounded-xl border p-4">
+                    <label className="mb-1.5 block text-xs font-medium">Pilih Kegiatan</label>
                     <Select
                         value={selected_kegiatan_id ? String(selected_kegiatan_id) : 'all'}
                         onValueChange={(value) => handleFilterChange(value)}
                     >
-                        <SelectTrigger className="w-64">
-                            <SelectValue placeholder="Semua Kegiatan" />
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="— Semua Kegiatan —" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">Semua Kegiatan</SelectItem>
