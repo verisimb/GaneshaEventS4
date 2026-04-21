@@ -15,6 +15,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { pendaftar as pendaftarRoute } from '@/routes';
 
 type KegiatanItem = {
@@ -173,18 +174,22 @@ export default function Pendaftar({
                 {/* Filter */}
                 <div className="flex items-center gap-2">
                     <Filter className="text-muted-foreground h-4 w-4 shrink-0" />
-                    <select
-                        value={selected_kegiatan_id ?? ''}
-                        onChange={(e) => handleFilterChange(e.target.value)}
-                        className="border-input bg-background focus:ring-ring rounded-lg border px-3 py-1.5 text-sm focus:ring-2 focus:outline-none"
+                    <Select
+                        value={selected_kegiatan_id ? String(selected_kegiatan_id) : ''}
+                        onValueChange={(value) => handleFilterChange(value)}
                     >
-                        <option value="">Semua Kegiatan</option>
-                        {kegiatan_list.map((k) => (
-                            <option key={k.id} value={k.id}>
-                                {k.judul}
-                            </option>
-                        ))}
-                    </select>
+                        <SelectTrigger className="w-64">
+                            <SelectValue placeholder="Semua Kegiatan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">Semua Kegiatan</SelectItem>
+                            {kegiatan_list.map((k) => (
+                                <SelectItem key={k.id} value={String(k.id)}>
+                                    {k.judul}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
 
                 {/* Table */}
