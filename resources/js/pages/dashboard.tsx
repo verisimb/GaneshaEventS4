@@ -86,26 +86,77 @@ function DeleteDialog({
     );
 }
 
-function KegiatanCard({
+function CompleteDialog({
     kegiatan,
-    onDelete,
+    open,
+    onOpenChange,
 }: {
-    kegiatan: Kegiatan;
-    onDelete: (k: Kegiatan) => void;
+    kegiatan: Kegiatan | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
 }) {
-    const [completing, setCompleting] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const isSelesai = kegiatan?.is_selesai ?? false;
 
     function handleComplete() {
-        setCompleting(true);
+        if (!kegiatan) return;
+        setLoading(true);
         router.patch(
             kegiatanComplete.url(kegiatan.id),
             {},
             {
-                onFinish: () => setCompleting(false),
+                onFinish: () => {
+                    setLoading(false);
+                    onOpenChange(false);
+                },
             },
         );
     }
 
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{isSelesai ? 'Aktifkan Kegiatan' : 'Selesaikan Kegiatan'}</DialogTitle>
+                    <DialogDescription>
+                        {isSelesai ? (
+                            <>
+                                Aktifkan kembali{' '}
+                                <span className="text-foreground font-semibold">"{kegiatan?.judul}"</span>?
+                                Kegiatan akan dipindahkan ke bagian "Akan Datang".
+                            </>
+                        ) : (
+                            <>
+                                Tandai{' '}
+                                <span className="text-foreground font-semibold">"{kegiatan?.judul}"</span>{' '}
+                                sebagai selesai? Peserta yang hadir akan dapat mengunduh sertifikat.
+                            </>
+                        )}
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+                        Batal
+                    </Button>
+                    <Button onClick={handleComplete} disabled={loading}>
+                        {loading ? 'Menyimpan...' : isSelesai ? 'Aktifkan' : 'Tandai Selesai'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
+
+function KegiatanCard({
+    kegiatan,
+    onDelete,
+    onComplete,
+}: {
+    kegiatan: Kegiatan;
+    onDelete: (k: Kegiatan) => void;
+    onComplete: (k: Kegiatan) => void;
+}) {
     return (
         <div className="group flex flex-col overflow-hidden rounded-xl border border-sidebar-border/70 bg-card transition-shadow hover:shadow-md dark:border-sidebar-border">
             {/* Banner */}
@@ -178,8 +229,7 @@ function KegiatanCard({
                         variant="outline"
                         size="sm"
                         className="flex-1 gap-1.5 text-xs"
-                        disabled={completing}
-                        onClick={handleComplete}
+                        onClick={() => onComplete(kegiatan)}
                         title={kegiatan.is_selesai ? 'Aktifkan kembali' : 'Tandai selesai'}
                     >
                         {kegiatan.is_selesai ? (
@@ -216,12 +266,14 @@ function SectionGrid({
     kegiatans,
     emptyMessage,
     onDelete,
+    onComplete,
 }: {
     title: string;
     count: number;
     kegiatans: Kegiatan[];
     emptyMessage: string;
     onDelete: (k: Kegiatan) => void;
+    onComplete: (k: Kegiatan) => void;
 }) {
     return (
         <section className="space-y-3">
@@ -235,7 +287,7 @@ function SectionGrid({
             {kegiatans.length > 0 ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {kegiatans.map((k) => (
-                        <KegiatanCard key={k.id} kegiatan={k} onDelete={onDelete} />
+                        <KegiatanCard key={k.id} kegiatan={k} onDelete={onDelete} onComplete={onComplete} />
                     ))}
                 </div>
             ) : (
@@ -256,10 +308,17 @@ export default function Dashboard({
 }) {
     const [deleteTarget, setDeleteTarget] = useState<Kegiatan | null>(null);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const [completeTarget, setCompleteTarget] = useState<Kegiatan | null>(null);
+    const [completeOpen, setCompleteOpen] = useState(false);
 
     function openDelete(k: Kegiatan) {
         setDeleteTarget(k);
         setDeleteOpen(true);
+    }
+
+    function openComplete(k: Kegiatan) {
+        setCompleteTarget(k);
+        setCompleteOpen(true);
     }
 
     const total = akan_datang.length + sudah_selesai.length;
@@ -269,6 +328,7 @@ export default function Dashboard({
             <Head title="Dashboard" />
 
             <DeleteDialog kegiatan={deleteTarget} open={deleteOpen} onOpenChange={setDeleteOpen} />
+            <CompleteDialog kegiatan={completeTarget} open={completeOpen} onOpenChange={setCompleteOpen} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 {/* Header */}
@@ -294,6 +354,7 @@ export default function Dashboard({
                     kegiatans={akan_datang}
                     emptyMessage="Tidak ada kegiatan yang akan datang."
                     onDelete={openDelete}
+                    onComplete={openComplete}
                 />
 
                 {/* Sudah Selesai */}
@@ -303,6 +364,7 @@ export default function Dashboard({
                     kegiatans={sudah_selesai}
                     emptyMessage="Belum ada kegiatan yang selesai."
                     onDelete={openDelete}
+                    onComplete={openComplete}
                 />
             </div>
         </>

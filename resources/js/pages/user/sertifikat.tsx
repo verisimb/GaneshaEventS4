@@ -63,12 +63,16 @@ function SertifikatCard({ sertifikat }: { sertifikat: Sertifikat }) {
 
                     {/* Download button */}
                     <div className="mt-3 border-t border-border pt-3">
-                        <a href={sertifikat.download_url} download>
-                            <Button size="sm" className="gap-1.5 bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700">
-                                <Download className="h-3.5 w-3.5" />
-                                Unduh Sertifikat
-                            </Button>
-                        </a>
+                        <Button
+                            size="sm"
+                            className="gap-1.5 bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+                            onClick={() => {
+                                window.location.href = sertifikat.download_url;
+                            }}
+                        >
+                            <Download className="h-3.5 w-3.5" />
+                            Unduh Sertifikat
+                        </Button>
                     </div>
                 </div>
             </div>
