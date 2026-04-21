@@ -94,9 +94,7 @@ export default function Sertifikat({ sertifikats }: { sertifikats: Sertifikat[] 
 
                 {sertifikats.length === 0 ? (
                     <div className="border-sidebar-border/70 flex min-h-[40vh] flex-col items-center justify-center gap-3 rounded-xl border border-dashed">
-                        <div className="rounded-full bg-amber-100 p-4 dark:bg-amber-500/10">
-                            <Award className="h-8 w-8 text-amber-500" />
-                        </div>
+                        <Award className="text-muted-foreground/40 h-10 w-10" />
                         <div className="text-center">
                             <p className="text-muted-foreground text-sm">Belum ada sertifikat tersedia.</p>
                             <p className="text-muted-foreground mt-0.5 text-xs">
