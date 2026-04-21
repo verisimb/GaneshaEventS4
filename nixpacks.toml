@@ -1,10 +1,13 @@
 providers = ["php"]
 
 [phases.setup]
-  nixPkgs = ["nodejs_22", "composer"]
+  nixPkgs = ["nodejs_22"]
 
 [phases.install]
   cmds = [
+    "php -r \"copy('https://getcomposer.org/installer', 'composer-setup.php');\"",
+    "php composer-setup.php --install-dir=/usr/local/bin --filename=composer",
+    "php -r \"unlink('composer-setup.php');\"",
     "npm install",
     "composer install --no-dev --optimize-autoloader --no-interaction"
   ]
