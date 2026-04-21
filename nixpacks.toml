@@ -1,7 +1,7 @@
 providers = ["php"]
 
 [phases.setup]
-  nixPkgs = ["nodejs_22"]
+  nixPkgs = ["nodejs_22", "composer"]
 
 [phases.install]
   cmds = [
