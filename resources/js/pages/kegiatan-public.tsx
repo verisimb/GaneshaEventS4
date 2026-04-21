@@ -6,11 +6,11 @@ import {
     CreditCard,
     LogIn,
     UserPlus,
-    Ticket,
     ArrowLeft,
 } from 'lucide-react';
 import { login, register } from '@/routes';
 import { Button } from '@/components/ui/button';
+import AppLogo from '@/components/app-logo';
 
 type KegiatanData = {
     id: number;
@@ -51,12 +51,9 @@ export default function KegiatanPublic({
                 {/* Navbar */}
                 <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm">
                     <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                                <Ticket className="h-4 w-4 text-primary-foreground" />
-                            </div>
-                            <span className="text-sm font-bold">Ganesha Event</span>
-                        </div>
+                        <Link href="/" className="flex items-center gap-2">
+                            <AppLogo />
+                        </Link>
                         <nav className="flex items-center gap-2">
                             <Link href={login()}>
                                 <Button variant="ghost" size="sm" className="gap-1.5">

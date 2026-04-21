@@ -1,8 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import { CalendarDays, MapPin, ArrowRight, Ticket, ImageOff, LogIn, UserPlus } from 'lucide-react';
+import { CalendarDays, MapPin, ArrowRight, ImageOff, LogIn, UserPlus } from 'lucide-react';
 import { login, register } from '@/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import AppLogo from '@/components/app-logo';
 
 type KegiatanPreview = {
     id: number;
@@ -99,12 +100,9 @@ export default function Welcome({
                 {/* Navbar */}
                 <header className="sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur-sm">
                     <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                                <Ticket className="h-4 w-4 text-primary-foreground" />
-                            </div>
-                            <span className="text-sm font-bold">Ganesha Event</span>
-                        </div>
+                        <Link href="/" className="flex items-center gap-2">
+                            <AppLogo />
+                        </Link>
                         <nav className="flex items-center gap-2">
                             <Link href={login()}>
                                 <Button variant="ghost" size="sm" className="gap-1.5">
@@ -128,10 +126,10 @@ export default function Welcome({
                 <section className="border-b border-border/40 px-4 py-16 text-center">
                     <div className="mx-auto max-w-2xl">
                         <Badge variant="secondary" className="mb-4">
-                            Platform Event Kampus Ganesha
+                            Platform Kegiatan Universitas Pendidikan Ganesha
                         </Badge>
                         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
-                            Temukan Event Kampus
+                            Temukan Kegiatan Kampus
                             <br />
                             <span className="text-primary">yang Tepat untuk Kamu</span>
                         </h1>
