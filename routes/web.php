@@ -11,7 +11,9 @@ use App\Http\Controllers\UserKegiatanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
-Route::get('/kegiatan/{kegiatan}', [HomeController::class, 'show'])->name('kegiatan.public');
+Route::get('/kegiatan/{kegiatan}', [HomeController::class, 'show'])
+    ->whereNumber('kegiatan')
+    ->name('kegiatan.public');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('user/kegiatan', [UserKegiatanController::class, '__invoke'])->name('user.kegiatan');
