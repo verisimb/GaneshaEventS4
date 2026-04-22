@@ -1,8 +1,9 @@
 import { Head, router, Link } from '@inertiajs/react';
-import { CalendarDays, MapPin, ImageOff, Search } from 'lucide-react';
+import { CalendarDays, MapPin, Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import EventCardBanner from '@/components/user/event-card-banner';
 
 type Kegiatan = {
     id: number;
@@ -16,45 +17,16 @@ type Kegiatan = {
     is_selesai: boolean;
 };
 
-function formatRupiah(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
-
 function KegiatanCard({ kegiatan }: { kegiatan: Kegiatan }) {
     return (
         <div className="group flex flex-col overflow-hidden rounded-xl border border-sidebar-border/70 bg-card transition-shadow hover:shadow-md dark:border-sidebar-border">
             {/* Banner */}
-            <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                {kegiatan.banner_url ? (
-                    <img
-                        src={kegiatan.banner_url}
-                        alt={kegiatan.judul}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="text-muted-foreground flex h-full w-full flex-col items-center justify-center gap-2">
-                        <ImageOff className="h-8 w-8 opacity-40" />
-                        <span className="text-xs opacity-40">Tidak ada banner</span>
-                    </div>
-                )}
-
-                {/* Badge harga / gratis */}
-                <div className="absolute top-2.5 left-2.5">
-                    {kegiatan.is_berbayar ? (
-                        <span className="inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                            💳 {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
-                        </span>
-                    ) : (
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                            🎟️ Gratis
-                        </span>
-                    )}
-                </div>
-            </div>
+            <EventCardBanner
+                bannerUrl={kegiatan.banner_url}
+                title={kegiatan.judul}
+                isBerbayar={kegiatan.is_berbayar}
+                harga={kegiatan.harga}
+            />
 
             {/* Content */}
             <div className="flex flex-1 flex-col gap-3 p-4">

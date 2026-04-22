@@ -4,6 +4,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import EventCardBanner from '@/components/user/event-card-banner';
 
 type TiketStatus = 'pending' | 'confirmed' | 'rejected';
 
@@ -114,39 +115,19 @@ function TiketCard({ tiket }: { tiket: Tiket }) {
     return (
         <>
             <div
-                className={`border-sidebar-border/70 dark:border-sidebar-border bg-card overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md ${isDimmed ? 'opacity-60' : ''}`}
+                className={`group border-sidebar-border/70 dark:border-sidebar-border bg-card overflow-hidden rounded-xl border shadow-sm transition-shadow hover:shadow-md ${isDimmed ? 'opacity-60' : ''}`}
             >
-                <div className="flex flex-col sm:flex-row">
+                <div className="flex h-full flex-col">
                     {/* Banner thumbnail */}
-                    <div className="relative h-32 w-full shrink-0 overflow-hidden bg-muted sm:h-auto sm:w-36">
-                        {tiket.kegiatan.banner_url ? (
-                            <img
-                                src={tiket.kegiatan.banner_url}
-                                alt={tiket.kegiatan.judul}
-                                className="h-full w-full object-cover"
-                            />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center">
-                                <Ticket className="text-muted-foreground/30 h-10 w-10" />
-                            </div>
-                        )}
-
-                        <div className="absolute top-2 left-2">
-                            {tiket.kegiatan.is_berbayar ? (
-                                <span className="inline-flex items-center rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                                    💳 Berbayar
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center rounded-full bg-emerald-500/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                                    🎟️ Gratis
-                                </span>
-                            )}
-                        </div>
-                    </div>
+                    <EventCardBanner
+                        bannerUrl={tiket.kegiatan.banner_url}
+                        title={tiket.kegiatan.judul}
+                        isBerbayar={tiket.kegiatan.is_berbayar}
+                    />
 
                     {/* Info */}
-                    <div className="flex flex-1 flex-col justify-between p-4">
-                        <div className="space-y-2">
+                    <div className="flex flex-1 flex-col gap-3 p-4">
+                        <div className="space-y-2 flex-1">
                             <div className="flex items-start justify-between gap-2">
                                 <h3 className="line-clamp-2 text-sm font-semibold leading-snug">
                                     {tiket.kegiatan.judul}
@@ -187,7 +168,7 @@ function TiketCard({ tiket }: { tiket: Tiket }) {
 
                         {/* Footer: absensi badge + QR button */}
                         {tiket.status === 'confirmed' && (
-                            <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+                            <div className="mt-auto flex items-center justify-between gap-2 border-t border-border pt-3">
                                 <div className="flex items-center gap-1.5">
                                     {tiket.is_attended ? (
                                         <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -260,7 +241,7 @@ export default function Tiket({ tikets }: { tikets: Tiket[] }) {
                         </Link>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-3">
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {tikets.map((tiket) => (
                             <TiketCard key={tiket.id} tiket={tiket} />
                         ))}

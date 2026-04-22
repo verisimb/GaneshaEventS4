@@ -1,5 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
-import { create as kegiatanCreate, store as kegiatanStore } from '@/actions/App/Http/Controllers/KegiatanController';
+import {
+    create as kegiatanCreate,
+    store as kegiatanStore,
+} from '@/actions/App/Http/Controllers/KegiatanController';
 import { dashboard } from '@/routes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +10,16 @@ import { Label } from '@/components/ui/label';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { Upload, ImageIcon, FileText, CreditCard, Building2, Hash, User, ArrowLeft } from 'lucide-react';
+import {
+    Upload,
+    ImageIcon,
+    FileText,
+    CreditCard,
+    Building2,
+    Hash,
+    User,
+    ArrowLeft,
+} from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
 type FormData = {
@@ -78,7 +90,7 @@ export default function KegiatanCreate() {
                 <div className="flex items-center gap-3">
                     <Link
                         href={dashboard()}
-                        className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm transition-colors"
+                        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                         <ArrowLeft className="h-4 w-4" />
                         Kembali
@@ -86,71 +98,109 @@ export default function KegiatanCreate() {
                 </div>
 
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Tambah Kegiatan</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Isi detail kegiatan yang akan diselenggarakan.</p>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Tambah Kegiatan
+                    </h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Isi detail kegiatan yang akan diselenggarakan.
+                    </p>
                 </div>
 
                 <form onSubmit={submit} className="space-y-8">
                     {/* ── Informasi Dasar ── */}
                     <section className="space-y-5 rounded-xl border border-sidebar-border/70 p-5 dark:border-sidebar-border">
-                        <h2 className="text-base font-semibold">Informasi Kegiatan</h2>
+                        <h2 className="text-base font-semibold">
+                            Informasi Kegiatan
+                        </h2>
 
                         {/* Judul */}
                         <div className="space-y-1.5">
                             <Label htmlFor="judul">
-                                Judul Kegiatan <span className="text-destructive">*</span>
+                                Judul Kegiatan{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <Input
                                 id="judul"
                                 value={data.judul}
-                                onChange={(e) => setData('judul', e.target.value)}
+                                onChange={(e) =>
+                                    setData('judul', e.target.value)
+                                }
                                 placeholder="Contoh: Seminar Nasional Teknologi 2025"
-                                className={cn(errors.judul && 'border-destructive')}
+                                className={cn(
+                                    errors.judul && 'border-destructive',
+                                )}
                             />
-                            {errors.judul && <p className="text-destructive text-xs">{errors.judul}</p>}
+                            {errors.judul && (
+                                <p className="text-xs text-destructive">
+                                    {errors.judul}
+                                </p>
+                            )}
                         </div>
 
                         {/* Deskripsi */}
                         <div className="space-y-1.5">
                             <Label>
-                                Deskripsi <span className="text-destructive">*</span>
+                                Deskripsi{' '}
+                                <span className="text-destructive">*</span>
                             </Label>
                             <RichTextEditor
                                 value={data.deskripsi}
                                 onChange={(val) => setData('deskripsi', val)}
                                 error={errors.deskripsi}
                             />
-                            {errors.deskripsi && <p className="text-destructive text-xs">{errors.deskripsi}</p>}
+                            {errors.deskripsi && (
+                                <p className="text-xs text-destructive">
+                                    {errors.deskripsi}
+                                </p>
+                            )}
                         </div>
 
                         {/* Tanggal & Waktu */}
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-1.5">
                                 <Label htmlFor="tanggal">
-                                    Tanggal <span className="text-destructive">*</span>
+                                    Tanggal{' '}
+                                    <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="tanggal"
                                     type="date"
                                     value={data.tanggal}
-                                    onChange={(e) => setData('tanggal', e.target.value)}
-                                    className={cn(errors.tanggal && 'border-destructive')}
+                                    onChange={(e) =>
+                                        setData('tanggal', e.target.value)
+                                    }
+                                    className={cn(
+                                        errors.tanggal && 'border-destructive',
+                                    )}
                                 />
-                                {errors.tanggal && <p className="text-destructive text-xs">{errors.tanggal}</p>}
+                                {errors.tanggal && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.tanggal}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
                                 <Label htmlFor="waktu">
-                                    Waktu <span className="text-destructive">*</span>
+                                    Waktu{' '}
+                                    <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="waktu"
                                     type="time"
                                     value={data.waktu}
-                                    onChange={(e) => setData('waktu', e.target.value)}
-                                    className={cn(errors.waktu && 'border-destructive')}
+                                    onChange={(e) =>
+                                        setData('waktu', e.target.value)
+                                    }
+                                    className={cn(
+                                        errors.waktu && 'border-destructive',
+                                    )}
                                 />
-                                {errors.waktu && <p className="text-destructive text-xs">{errors.waktu}</p>}
+                                {errors.waktu && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.waktu}
+                                    </p>
+                                )}
                             </div>
                         </div>
 
@@ -158,30 +208,49 @@ export default function KegiatanCreate() {
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div className="space-y-1.5">
                                 <Label htmlFor="lokasi">
-                                    Lokasi <span className="text-destructive">*</span>
+                                    Lokasi{' '}
+                                    <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="lokasi"
                                     value={data.lokasi}
-                                    onChange={(e) => setData('lokasi', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('lokasi', e.target.value)
+                                    }
                                     placeholder="Contoh: Aula Kampus Undiksha"
-                                    className={cn(errors.lokasi && 'border-destructive')}
+                                    className={cn(
+                                        errors.lokasi && 'border-destructive',
+                                    )}
                                 />
-                                {errors.lokasi && <p className="text-destructive text-xs">{errors.lokasi}</p>}
+                                {errors.lokasi && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.lokasi}
+                                    </p>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
                                 <Label htmlFor="penyelenggara">
-                                    Penyelenggara <span className="text-destructive">*</span>
+                                    Penyelenggara{' '}
+                                    <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="penyelenggara"
                                     value={data.penyelenggara}
-                                    onChange={(e) => setData('penyelenggara', e.target.value)}
+                                    onChange={(e) =>
+                                        setData('penyelenggara', e.target.value)
+                                    }
                                     placeholder="Contoh: BEM FTK Undiksha"
-                                    className={cn(errors.penyelenggara && 'border-destructive')}
+                                    className={cn(
+                                        errors.penyelenggara &&
+                                            'border-destructive',
+                                    )}
                                 />
-                                {errors.penyelenggara && <p className="text-destructive text-xs">{errors.penyelenggara}</p>}
+                                {errors.penyelenggara && (
+                                    <p className="text-xs text-destructive">
+                                        {errors.penyelenggara}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </section>
@@ -193,26 +262,35 @@ export default function KegiatanCreate() {
                         {/* Banner Event */}
                         <div className="space-y-2">
                             <Label>Banner Event</Label>
-                            <p className="text-muted-foreground text-xs">Ukuran maksimal 2 MB. Format: JPG, PNG, WebP.</p>
+                            <p className="text-xs text-muted-foreground">
+                                Gunakan rasio 16:9. Ukuran maksimal 2 MB.
+                                Format: JPG, PNG, WebP.
+                            </p>
                             <label
                                 htmlFor="banner"
                                 className={cn(
-                                    'border-input hover:border-primary/50 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed transition-colors',
+                                    'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input transition-colors hover:border-primary/50',
                                     bannerPreview ? 'p-2' : 'p-8',
                                 )}
                             >
                                 {bannerPreview ? (
-                                    <img
-                                        src={bannerPreview}
-                                        alt="Preview Banner"
-                                        className="max-h-48 w-full rounded-md object-cover"
-                                    />
+                                    <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
+                                        <img
+                                            src={bannerPreview}
+                                            alt="Preview Banner"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
                                 ) : (
                                     <>
-                                        <ImageIcon className="text-muted-foreground h-8 w-8" />
+                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
                                         <div className="text-center">
-                                            <p className="text-sm font-medium">Klik untuk upload banner</p>
-                                            <p className="text-muted-foreground text-xs">atau seret & lepas file di sini</p>
+                                            <p className="text-sm font-medium">
+                                                Klik untuk upload banner
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                atau seret & lepas file di sini
+                                            </p>
                                         </div>
                                     </>
                                 )}
@@ -224,34 +302,48 @@ export default function KegiatanCreate() {
                                     onChange={handleBannerChange}
                                 />
                             </label>
-                            {errors.banner && <p className="text-destructive text-xs">{errors.banner}</p>}
+                            {errors.banner && (
+                                <p className="text-xs text-destructive">
+                                    {errors.banner}
+                                </p>
+                            )}
                         </div>
 
                         {/* Template Sertifikat */}
                         <div className="space-y-2">
                             <Label>Template Sertifikat</Label>
-                            <p className="text-muted-foreground text-xs">Ukuran maksimal 4 MB. Format: JPG, PNG, PDF.</p>
+                            <p className="text-xs text-muted-foreground">
+                                Ukuran maksimal 4 MB. Format: JPG, PNG.
+                                Kosongkan Nama peserta di tengah template.
+                            </p>
                             <label
                                 htmlFor="template_sertifikat"
                                 className={cn(
-                                    'border-input hover:border-primary/50 flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed p-4 transition-colors',
-                                    sertifikatName && 'border-primary/30 bg-primary/5',
+                                    'flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-input p-4 transition-colors hover:border-primary/50',
+                                    sertifikatName &&
+                                        'border-primary/30 bg-primary/5',
                                 )}
                             >
-                                <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                                    <FileText className="text-primary h-5 w-5" />
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                                    <FileText className="h-5 w-5 text-primary" />
                                 </div>
                                 <div className="flex-1">
                                     {sertifikatName ? (
-                                        <p className="text-sm font-medium">{sertifikatName}</p>
+                                        <p className="text-sm font-medium">
+                                            {sertifikatName}
+                                        </p>
                                     ) : (
                                         <>
-                                            <p className="text-sm font-medium">Upload template sertifikat</p>
-                                            <p className="text-muted-foreground text-xs">Klik untuk memilih file</p>
+                                            <p className="text-sm font-medium">
+                                                Upload template sertifikat
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Klik untuk memilih file
+                                            </p>
                                         </>
                                     )}
                                 </div>
-                                <Upload className="text-muted-foreground h-4 w-4 shrink-0" />
+                                <Upload className="h-4 w-4 shrink-0 text-muted-foreground" />
                                 <input
                                     id="template_sertifikat"
                                     type="file"
@@ -261,14 +353,18 @@ export default function KegiatanCreate() {
                                 />
                             </label>
                             {errors.template_sertifikat && (
-                                <p className="text-destructive text-xs">{errors.template_sertifikat}</p>
+                                <p className="text-xs text-destructive">
+                                    {errors.template_sertifikat}
+                                </p>
                             )}
                         </div>
                     </section>
 
                     {/* ── Tipe Kegiatan ── */}
                     <section className="space-y-5 rounded-xl border border-sidebar-border/70 p-5 dark:border-sidebar-border">
-                        <h2 className="text-base font-semibold">Tipe Kegiatan</h2>
+                        <h2 className="text-base font-semibold">
+                            Tipe Kegiatan
+                        </h2>
 
                         <div className="grid grid-cols-2 gap-3">
                             {/* Gratis */}
@@ -284,8 +380,12 @@ export default function KegiatanCreate() {
                             >
                                 <span className="text-2xl">🎟️</span>
                                 <div className="text-center">
-                                    <p className="text-sm font-semibold">Gratis</p>
-                                    <p className="text-xs opacity-70">Tidak ada biaya pendaftaran</p>
+                                    <p className="text-sm font-semibold">
+                                        Gratis
+                                    </p>
+                                    <p className="text-xs opacity-70">
+                                        Tidak ada biaya pendaftaran
+                                    </p>
                                 </div>
                             </button>
 
@@ -302,16 +402,20 @@ export default function KegiatanCreate() {
                             >
                                 <span className="text-2xl">💳</span>
                                 <div className="text-center">
-                                    <p className="text-sm font-semibold">Berbayar</p>
-                                    <p className="text-xs opacity-70">Peserta membayar untuk ikut</p>
+                                    <p className="text-sm font-semibold">
+                                        Berbayar
+                                    </p>
+                                    <p className="text-xs opacity-70">
+                                        Peserta membayar untuk ikut
+                                    </p>
                                 </div>
                             </button>
                         </div>
 
                         {/* Payment details — conditional */}
                         {data.is_berbayar && (
-                            <div className="animate-in fade-in slide-in-from-top-2 space-y-4 rounded-lg bg-muted/40 p-4 duration-200">
-                                <p className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider">
+                            <div className="animate-in space-y-4 rounded-lg bg-muted/40 p-4 duration-200 fade-in slide-in-from-top-2">
+                                <p className="flex items-center gap-1.5 text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                     <CreditCard className="h-3.5 w-3.5" />
                                     Informasi Pembayaran
                                 </p>
@@ -319,10 +423,13 @@ export default function KegiatanCreate() {
                                 {/* Harga */}
                                 <div className="space-y-1.5">
                                     <Label htmlFor="harga">
-                                        Harga (Rp) <span className="text-destructive">*</span>
+                                        Harga (Rp){' '}
+                                        <span className="text-destructive">
+                                            *
+                                        </span>
                                     </Label>
                                     <div className="relative">
-                                        <span className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2 text-sm">
+                                        <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
                                             Rp
                                         </span>
                                         <Input
@@ -330,64 +437,115 @@ export default function KegiatanCreate() {
                                             type="number"
                                             min="0"
                                             value={data.harga}
-                                            onChange={(e) => setData('harga', e.target.value)}
+                                            onChange={(e) =>
+                                                setData('harga', e.target.value)
+                                            }
                                             placeholder="50000"
-                                            className={cn('pl-10', errors.harga && 'border-destructive')}
+                                            className={cn(
+                                                'pl-10',
+                                                errors.harga &&
+                                                    'border-destructive',
+                                            )}
                                         />
                                     </div>
-                                    {errors.harga && <p className="text-destructive text-xs">{errors.harga}</p>}
+                                    {errors.harga && (
+                                        <p className="text-xs text-destructive">
+                                            {errors.harga}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="grid gap-4 sm:grid-cols-3">
                                     {/* Nama Bank */}
                                     <div className="space-y-1.5">
                                         <Label htmlFor="nama_bank">
-                                            <Building2 className="mb-0.5 mr-1 inline h-3.5 w-3.5" />
-                                            Nama Bank <span className="text-destructive">*</span>
+                                            <Building2 className="mr-1 mb-0.5 inline h-3.5 w-3.5" />
+                                            Nama Bank{' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
                                         </Label>
                                         <Input
                                             id="nama_bank"
                                             value={data.nama_bank}
-                                            onChange={(e) => setData('nama_bank', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'nama_bank',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="BRI / BNI / Mandiri..."
-                                            className={cn(errors.nama_bank && 'border-destructive')}
+                                            className={cn(
+                                                errors.nama_bank &&
+                                                    'border-destructive',
+                                            )}
                                         />
-                                        {errors.nama_bank && <p className="text-destructive text-xs">{errors.nama_bank}</p>}
+                                        {errors.nama_bank && (
+                                            <p className="text-xs text-destructive">
+                                                {errors.nama_bank}
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* No. Rekening */}
                                     <div className="space-y-1.5">
                                         <Label htmlFor="no_rekening">
-                                            <Hash className="mb-0.5 mr-1 inline h-3.5 w-3.5" />
-                                            No. Rekening <span className="text-destructive">*</span>
+                                            <Hash className="mr-1 mb-0.5 inline h-3.5 w-3.5" />
+                                            No. Rekening{' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
                                         </Label>
                                         <Input
                                             id="no_rekening"
                                             value={data.no_rekening}
-                                            onChange={(e) => setData('no_rekening', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'no_rekening',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="1234567890"
-                                            className={cn(errors.no_rekening && 'border-destructive')}
+                                            className={cn(
+                                                errors.no_rekening &&
+                                                    'border-destructive',
+                                            )}
                                         />
                                         {errors.no_rekening && (
-                                            <p className="text-destructive text-xs">{errors.no_rekening}</p>
+                                            <p className="text-xs text-destructive">
+                                                {errors.no_rekening}
+                                            </p>
                                         )}
                                     </div>
 
                                     {/* Atas Nama */}
                                     <div className="space-y-1.5">
                                         <Label htmlFor="atas_nama">
-                                            <User className="mb-0.5 mr-1 inline h-3.5 w-3.5" />
-                                            Atas Nama <span className="text-destructive">*</span>
+                                            <User className="mr-1 mb-0.5 inline h-3.5 w-3.5" />
+                                            Atas Nama{' '}
+                                            <span className="text-destructive">
+                                                *
+                                            </span>
                                         </Label>
                                         <Input
                                             id="atas_nama"
                                             value={data.atas_nama}
-                                            onChange={(e) => setData('atas_nama', e.target.value)}
+                                            onChange={(e) =>
+                                                setData(
+                                                    'atas_nama',
+                                                    e.target.value,
+                                                )
+                                            }
                                             placeholder="Nama pemilik rekening"
-                                            className={cn(errors.atas_nama && 'border-destructive')}
+                                            className={cn(
+                                                errors.atas_nama &&
+                                                    'border-destructive',
+                                            )}
                                         />
                                         {errors.atas_nama && (
-                                            <p className="text-destructive text-xs">{errors.atas_nama}</p>
+                                            <p className="text-xs text-destructive">
+                                                {errors.atas_nama}
+                                            </p>
                                         )}
                                     </div>
                                 </div>
@@ -398,7 +556,11 @@ export default function KegiatanCreate() {
                     {/* ── Actions ── */}
                     <div className="flex items-center justify-end gap-3 pb-6">
                         <Link href={dashboard()}>
-                            <Button type="button" variant="outline" disabled={processing}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={processing}
+                            >
                                 Batal
                             </Button>
                         </Link>
