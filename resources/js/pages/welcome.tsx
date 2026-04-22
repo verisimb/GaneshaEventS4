@@ -150,6 +150,18 @@ export default function Welcome({
                                 </Button>
                             </Link>
                         </div>
+
+                        <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5 text-xs text-muted-foreground">
+                            <span className="rounded-full border border-border bg-muted/50 px-3 py-1">
+                                {upcomingEvents.length} kegiatan mendatang
+                            </span>
+                            <span className="rounded-full border border-border bg-muted/50 px-3 py-1">
+                                Gratis & berbayar
+                            </span>
+                            <span className="rounded-full border border-border bg-muted/50 px-3 py-1">
+                                Sertifikat digital otomatis
+                            </span>
+                        </div>
                     </div>
                 </section>
 

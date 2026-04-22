@@ -374,16 +374,16 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
 
                 {/* Scanner area */}
                 {selectedId && (
-                    <div className="border-sidebar-border/70 dark:border-sidebar-border flex flex-col gap-4 rounded-xl border p-4">
+                    <div className="border-sidebar-border/70 dark:border-sidebar-border flex flex-col gap-3 rounded-xl border p-3 sm:gap-4 sm:p-4">
                         {/* Tab toggle: QR vs Manual */}
-                        <div className="flex items-center justify-between">
-                            <div className="inline-flex gap-1 rounded-lg bg-muted p-1">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="grid w-full grid-cols-2 gap-1 rounded-lg bg-muted p-1 sm:inline-flex sm:w-auto">
                                 <button
                                     onClick={() => {
                                         setScanMode('qr');
                                         setScanResult(null);
                                     }}
-                                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                                    className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
                                         scanMode === 'qr'
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground'
@@ -398,7 +398,7 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                                         setScanning(false);
                                         setScanResult(null);
                                     }}
-                                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                                    className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
                                         scanMode === 'manual'
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground'
@@ -414,7 +414,7 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
                                 <Button
                                     variant={scanning ? 'destructive' : 'default'}
                                     size="sm"
-                                    className="gap-1.5"
+                                    className="w-full gap-1.5 sm:w-auto"
                                     onClick={() => {
                                         setScanning((s) => !s);
                                         setScanResult(null);
@@ -437,12 +437,12 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
 
                         {/* Mode: QR Scanner */}
                         {scanMode === 'qr' && (
-                            <div className="relative overflow-hidden rounded-xl bg-black/5 dark:bg-white/5">
+                            <div className="relative overflow-hidden rounded-lg bg-black/5 dark:bg-white/5 sm:rounded-xl">
                                 {/* Idle state */}
                                 {!scanning && (
-                                    <div className="flex min-h-[220px] flex-col items-center justify-center gap-2">
+                                    <div className="flex min-h-[260px] flex-col items-center justify-center gap-2 px-4 sm:min-h-[220px]">
                                         <ScanLine className="text-muted-foreground/40 h-12 w-12" />
-                                        <p className="text-muted-foreground text-xs">
+                                        <p className="text-muted-foreground text-center text-xs">
                                             Tekan "Mulai Scan" untuk membuka kamera.
                                         </p>
                                         <button
@@ -506,7 +506,7 @@ export default function Absensi({ kegiatans }: { kegiatans: Kegiatan[] }) {
 
                         {/* Mode: Manual Input */}
                         {scanMode === 'manual' && (
-                            <div className="rounded-xl bg-muted/40 p-4">
+                            <div className="rounded-lg bg-muted/40 p-3 sm:rounded-xl sm:p-4">
                                 <ManualInput onSubmit={handleManual} loading={manualLoading} />
                             </div>
                         )}
