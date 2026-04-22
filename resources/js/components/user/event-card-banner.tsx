@@ -25,7 +25,7 @@ export default function EventCardBanner({
     badgeText,
     badgeClassName,
 }: EventCardBannerProps) {
-    const defaultBadgeText = isBerbayar ? `💳 ${harga ? formatRupiah(harga) : 'Berbayar'}` : '🎟️ Gratis';
+    const defaultBadgeText = isBerbayar ? (harga ? formatRupiah(harga) : 'Berbayar') : 'Gratis';
     const finalBadgeText = badgeText ?? defaultBadgeText;
     const defaultBadgeClass = isBerbayar
         ? 'bg-black/70 text-white'

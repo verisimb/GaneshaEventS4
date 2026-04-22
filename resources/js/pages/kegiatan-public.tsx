@@ -102,11 +102,11 @@ export default function KegiatanPublic({
                             <div className="absolute top-4 left-4">
                                 {kegiatan.is_berbayar ? (
                                     <span className="inline-flex items-center rounded-full bg-black/70 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm shadow-sm">
-                                        💳 {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
+                                        {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
                                     </span>
                                 ) : (
                                     <span className="inline-flex items-center rounded-full bg-emerald-500/90 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur-sm shadow-sm">
-                                        🎟️ Gratis
+                                        Gratis
                                     </span>
                                 )}
                             </div>

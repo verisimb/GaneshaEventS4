@@ -178,11 +178,11 @@ function KegiatanCard({
                 <div className="absolute top-2.5 left-2.5">
                     {kegiatan.is_berbayar ? (
                         <span className="inline-flex items-center rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                            💳 {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
+                            {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
                         </span>
                     ) : (
                         <span className="inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                            🎟️ Gratis
+                            Gratis
                         </span>
                     )}
                 </div>
