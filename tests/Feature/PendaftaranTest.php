@@ -3,8 +3,10 @@
 use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use App\Models\User;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 
-uses(\Illuminate\Foundation\Testing\LazilyRefreshDatabase::class);
+uses(LazilyRefreshDatabase::class);
 
 // --- store: auto-confirm ---
 
@@ -33,7 +35,7 @@ test('registering for a paid event sets status to pending', function () {
         'nama_lengkap' => 'Budi Santoso',
         'email' => 'budi@example.com',
         'no_hp' => '081234567890',
-        'bukti_pembayaran' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+        'bukti_pembayaran' => UploadedFile::fake()->image('bukti.jpg'),
     ]);
 
     $this->assertDatabaseHas('pendaftarans', [
@@ -81,6 +83,50 @@ test('organizer can filter pendaftaran by kegiatan_id', function () {
     $response->assertOk();
     $response->assertInertia(
         fn ($page) => $page->has('pendaftarans', 1),
+    );
+});
+
+test('organizer can filter pendaftaran by status', function () {
+    $organizer = User::factory()->organizer()->create();
+    $kegiatan = Kegiatan::factory()->for($organizer)->create();
+
+    Pendaftaran::factory()->for($kegiatan, 'kegiatan')->create(['status' => 'pending']);
+    $confirmed = Pendaftaran::factory()->for($kegiatan, 'kegiatan')->confirmed()->create();
+
+    $response = $this->actingAs($organizer)
+        ->get(route('pendaftar', ['status' => 'confirmed']));
+
+    $response->assertOk();
+    $response->assertInertia(
+        fn ($page) => $page
+            ->has('pendaftarans', 1)
+            ->where('pendaftarans.0.id', $confirmed->id),
+    );
+});
+
+test('organizer can search pendaftaran by nama email and phone', function () {
+    $organizer = User::factory()->organizer()->create();
+    $kegiatan = Kegiatan::factory()->for($organizer)->create();
+
+    Pendaftaran::factory()->for($kegiatan, 'kegiatan')->create([
+        'nama_lengkap' => 'Siti Rahayu',
+        'email' => 'siti@example.com',
+        'no_hp' => '0811111111',
+    ]);
+    $target = Pendaftaran::factory()->for($kegiatan, 'kegiatan')->create([
+        'nama_lengkap' => 'Andi Pratama',
+        'email' => 'andi@example.com',
+        'no_hp' => '0822222222',
+    ]);
+
+    $response = $this->actingAs($organizer)
+        ->get(route('pendaftar', ['search' => 'andi@example.com']));
+
+    $response->assertOk();
+    $response->assertInertia(
+        fn ($page) => $page
+            ->has('pendaftarans', 1)
+            ->where('pendaftarans.0.id', $target->id),
     );
 });
 
@@ -135,6 +181,33 @@ test('organizer cannot reject a pendaftaran belonging to another organizer', fun
 
     $this->actingAs($organizer)
         ->patch(route('pendaftar.reject', $pendaftaran))
+        ->assertForbidden();
+});
+
+// --- destroy ---
+
+test('organizer can delete a pendaftaran for their kegiatan', function () {
+    $organizer = User::factory()->organizer()->create();
+    $kegiatan = Kegiatan::factory()->for($organizer)->create();
+    $pendaftaran = Pendaftaran::factory()->for($kegiatan, 'kegiatan')->create();
+
+    $this->actingAs($organizer)
+        ->delete(route('pendaftar.destroy', $pendaftaran))
+        ->assertRedirect();
+
+    $this->assertDatabaseMissing('pendaftarans', [
+        'id' => $pendaftaran->id,
+    ]);
+});
+
+test('organizer cannot delete a pendaftaran belonging to another organizer', function () {
+    $organizer = User::factory()->organizer()->create();
+    $otherOrganizer = User::factory()->organizer()->create();
+    $otherKegiatan = Kegiatan::factory()->for($otherOrganizer)->create();
+    $pendaftaran = Pendaftaran::factory()->for($otherKegiatan, 'kegiatan')->create();
+
+    $this->actingAs($organizer)
+        ->delete(route('pendaftar.destroy', $pendaftaran))
         ->assertForbidden();
 });
 

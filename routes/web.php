@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->group(function () {
     Route::get('pendaftar', [PendaftaranController::class, 'index'])->name('pendaftar');
     Route::patch('pendaftar/{pendaftaran}/confirm', [PendaftaranController::class, 'confirm'])->name('pendaftar.confirm');
     Route::patch('pendaftar/{pendaftaran}/reject', [PendaftaranController::class, 'reject'])->name('pendaftar.reject');
+    Route::delete('pendaftar/{pendaftaran}', [PendaftaranController::class, 'destroy'])->name('pendaftar.destroy');
     Route::get('absensi', [AbsensiController::class, 'index'])->name('absensi');
     Route::post('absensi/verify', [AbsensiController::class, 'verify'])->name('absensi.verify');
     Route::get('absensi/{kegiatan}/peserta', [AbsensiController::class, 'peserta'])->name('absensi.peserta');

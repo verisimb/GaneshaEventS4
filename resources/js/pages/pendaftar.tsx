@@ -1,8 +1,9 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
-import { CheckCircle2, XCircle, Eye } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { CheckCircle2, Eye, MoreHorizontal, Search, Trash2, XCircle } from 'lucide-react';
 import {
     confirm as pendaftaranConfirm,
+    destroy as pendaftaranDestroy,
     reject as pendaftaranReject,
     index as pendaftaranIndex,
 } from '@/actions/App/Http/Controllers/PendaftaranController';
@@ -15,6 +16,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { pendaftar as pendaftarRoute } from '@/routes';
 
@@ -116,25 +124,108 @@ function RejectDialog({
     );
 }
 
+function DeleteDialog({
+    target,
+    open,
+    onOpenChange,
+}: {
+    target: Pendaftaran | null;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}) {
+    const [processing, setProcessing] = useState(false);
+
+    function handleDelete() {
+        if (!target) {
+            return;
+        }
+
+        setProcessing(true);
+        router.delete(pendaftaranDestroy.url(target.id), {
+            onFinish: () => {
+                setProcessing(false);
+                onOpenChange(false);
+            },
+        });
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Hapus Pendaftar</DialogTitle>
+                    <DialogDescription>
+                        Apakah Anda yakin ingin menghapus pendaftaran dari{' '}
+                        <span className="text-foreground font-semibold">"{target?.nama_lengkap}"</span>? Data ini akan hilang
+                        permanen.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={processing}>
+                        Batal
+                    </Button>
+                    <Button variant="destructive" onClick={handleDelete} disabled={processing}>
+                        {processing ? 'Menghapus...' : 'Hapus'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
 export default function Pendaftar({
     pendaftarans,
     kegiatan_list,
     selected_kegiatan_id,
+    selected_status,
+    search,
 }: {
     pendaftarans: Pendaftaran[];
     kegiatan_list: KegiatanItem[];
     selected_kegiatan_id: number | null;
+    selected_status: 'all' | Pendaftaran['status'];
+    search: string;
 }) {
     const [rejectTarget, setRejectTarget] = useState<Pendaftaran | null>(null);
     const [rejectOpen, setRejectOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<Pendaftaran | null>(null);
+    const [deleteOpen, setDeleteOpen] = useState(false);
     const [confirming, setConfirming] = useState<number | null>(null);
+    const [searchValue, setSearchValue] = useState(search);
+    const [statusFilter, setStatusFilter] = useState<string>(selected_status ?? 'all');
+
+    useEffect(() => {
+        setSearchValue(search);
+    }, [search]);
+
+    useEffect(() => {
+        setStatusFilter(selected_status ?? 'all');
+    }, [selected_status]);
+
+    function applyFilters(nextFilters?: Partial<{ kegiatanId: string; status: string; search: string }>) {
+        const kegiatanValue = nextFilters?.kegiatanId ?? (selected_kegiatan_id ? String(selected_kegiatan_id) : 'all');
+        const statusValue = nextFilters?.status ?? statusFilter;
+        const searchQuery = nextFilters?.search ?? searchValue;
+
+        const params: Record<string, string> = {};
+
+        if (kegiatanValue !== 'all') {
+            params.kegiatan_id = kegiatanValue;
+        }
+
+        if (statusValue !== 'all') {
+            params.status = statusValue;
+        }
+
+        if (searchQuery.trim()) {
+            params.search = searchQuery.trim();
+        }
+
+        router.get(pendaftaranIndex.url(), params, { preserveState: true, replace: true });
+    }
 
     function handleFilterChange(value: string) {
-        router.get(
-            pendaftaranIndex.url(),
-            value && value !== 'all' ? { kegiatan_id: value } : {},
-            { preserveState: true, replace: true },
-        );
+        applyFilters({ kegiatanId: value });
     }
 
     function handleConfirm(pendaftaran: Pendaftaran) {
@@ -153,11 +244,17 @@ export default function Pendaftar({
         setRejectOpen(true);
     }
 
+    function openDelete(pendaftaran: Pendaftaran) {
+        setDeleteTarget(pendaftaran);
+        setDeleteOpen(true);
+    }
+
     return (
         <>
             <Head title="Pendaftar" />
 
             <RejectDialog target={rejectTarget} open={rejectOpen} onOpenChange={setRejectOpen} />
+            <DeleteDialog target={deleteTarget} open={deleteOpen} onOpenChange={setDeleteOpen} />
 
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
                 <div className="flex items-center justify-between">
@@ -173,23 +270,78 @@ export default function Pendaftar({
 
                 {/* Filter */}
                 <div className="border-sidebar-border/70 dark:border-sidebar-border rounded-xl border p-4">
-                    <label className="mb-1.5 block text-xs font-medium">Pilih Kegiatan</label>
-                    <Select
-                        value={selected_kegiatan_id ? String(selected_kegiatan_id) : 'all'}
-                        onValueChange={(value) => handleFilterChange(value)}
-                    >
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="— Semua Kegiatan —" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">Semua Kegiatan</SelectItem>
-                            {kegiatan_list.map((k) => (
-                                <SelectItem key={k.id} value={String(k.id)}>
-                                    {k.judul}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                        <div>
+                            <label className="mb-1.5 block text-xs font-medium">Pilih Kegiatan</label>
+                            <Select
+                                value={selected_kegiatan_id ? String(selected_kegiatan_id) : 'all'}
+                                onValueChange={(value) => handleFilterChange(value)}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="— Semua Kegiatan —" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Kegiatan</SelectItem>
+                                    {kegiatan_list.map((k) => (
+                                        <SelectItem key={k.id} value={String(k.id)}>
+                                            {k.judul}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <label className="mb-1.5 block text-xs font-medium">Filter Status</label>
+                            <Select
+                                value={statusFilter}
+                                onValueChange={(value) => {
+                                    setStatusFilter(value);
+                                    applyFilters({ status: value });
+                                }}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Semua Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Semua Status</SelectItem>
+                                    <SelectItem value="pending">Menunggu</SelectItem>
+                                    <SelectItem value="confirmed">Terkonfirmasi</SelectItem>
+                                    <SelectItem value="rejected">Ditolak</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="mb-1.5 block text-xs font-medium">Pencarian</label>
+                            <div className="flex gap-2">
+                                <Input
+                                    value={searchValue}
+                                    onChange={(event) => setSearchValue(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === 'Enter') {
+                                            event.preventDefault();
+                                            applyFilters({ search: searchValue });
+                                        }
+                                    }}
+                                    placeholder="Cari nama, email, atau no. HP"
+                                />
+                                <Button variant="outline" onClick={() => applyFilters({ search: searchValue })}>
+                                    <Search className="mr-1 h-4 w-4" />
+                                    Cari
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setSearchValue('');
+                                        applyFilters({ search: '', status: 'all', kegiatanId: 'all' });
+                                    }}
+                                >
+                                    Reset
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Table */}
@@ -264,7 +416,32 @@ export default function Pendaftar({
                                                 )}
                                             </td>
                                             <td className="px-4 py-3">
-                                                {p.status === 'pending' ? (
+                                                {p.status === 'confirmed' ? (
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7">
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem
+                                                                onClick={() => handleConfirm(p)}
+                                                                disabled={confirming === p.id}
+                                                            >
+                                                                <CheckCircle2 className="h-4 w-4" />
+                                                                {confirming === p.id ? 'Memproses...' : 'Konfirmasi'}
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => openReject(p)}>
+                                                                <XCircle className="h-4 w-4" />
+                                                                Ubah ke Ditolak
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem variant="destructive" onClick={() => openDelete(p)}>
+                                                                <Trash2 className="h-4 w-4" />
+                                                                Hapus
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                ) : (
                                                     <div className="flex items-center gap-1.5">
                                                         <Button
                                                             size="sm"
@@ -285,9 +462,16 @@ export default function Pendaftar({
                                                             <XCircle className="h-3.5 w-3.5" />
                                                             Tolak
                                                         </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 gap-1 px-2 text-xs"
+                                                            onClick={() => openDelete(p)}
+                                                        >
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                            Hapus
+                                                        </Button>
                                                     </div>
-                                                ) : (
-                                                    <span className="text-muted-foreground text-xs">—</span>
                                                 )}
                                             </td>
                                         </tr>

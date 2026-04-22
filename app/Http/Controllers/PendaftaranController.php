@@ -6,6 +6,7 @@ use App\Models\Kegiatan;
 use App\Models\Pendaftaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,6 +28,24 @@ class PendaftaranController extends Controller
 
         if ($request->filled('kegiatan_id')) {
             $query->where('kegiatan_id', $request->integer('kegiatan_id'));
+        }
+
+        $status = $request->string('status')->toString();
+        $allowedStatuses = ['pending', 'confirmed', 'rejected'];
+
+        if ($status !== '' && in_array($status, $allowedStatuses, true)) {
+            $query->where('status', $status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+
+            $query->where(function ($builder) use ($search) {
+                $builder
+                    ->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('no_hp', 'like', "%{$search}%");
+            });
         }
 
         $pendaftarans = $query->get()->map(fn (Pendaftaran $p) => [
@@ -51,6 +70,8 @@ class PendaftaranController extends Controller
             'selected_kegiatan_id' => $request->filled('kegiatan_id')
                 ? $request->integer('kegiatan_id')
                 : null,
+            'selected_status' => in_array($status, $allowedStatuses, true) ? $status : 'all',
+            'search' => $request->string('search')->toString(),
         ]);
     }
 
@@ -59,7 +80,7 @@ class PendaftaranController extends Controller
         abort_if($pendaftaran->kegiatan->user_id !== auth()->id(), 403);
 
         $pendaftaran->update([
-            'status'      => 'confirmed',
+            'status' => 'confirmed',
             'ticket_code' => (string) Str::uuid(),
         ]);
 
@@ -73,6 +94,19 @@ class PendaftaranController extends Controller
         $pendaftaran->update(['status' => 'rejected']);
 
         return back()->with('success', 'Pendaftar berhasil ditolak.');
+    }
+
+    public function destroy(Pendaftaran $pendaftaran): RedirectResponse
+    {
+        abort_if($pendaftaran->kegiatan->user_id !== auth()->id(), 403);
+
+        if ($pendaftaran->bukti_pembayaran) {
+            Storage::disk('public')->delete($pendaftaran->bukti_pembayaran);
+        }
+
+        $pendaftaran->delete();
+
+        return back()->with('success', 'Pendaftar berhasil dihapus.');
     }
 
     public function store(Request $request, Kegiatan $kegiatan)
@@ -106,13 +140,13 @@ class PendaftaranController extends Controller
         }
 
         $kegiatan->pendaftarans()->create([
-            'user_id'          => $request->user()->id,
-            'nama_lengkap'     => $validated['nama_lengkap'],
-            'email'            => $validated['email'],
-            'no_hp'            => $validated['no_hp'],
+            'user_id' => $request->user()->id,
+            'nama_lengkap' => $validated['nama_lengkap'],
+            'email' => $validated['email'],
+            'no_hp' => $validated['no_hp'],
             'bukti_pembayaran' => $validated['bukti_pembayaran'] ?? null,
-            'status'           => $kegiatan->is_berbayar ? 'pending' : 'confirmed',
-            'ticket_code'      => $kegiatan->is_berbayar ? null : (string) Str::uuid(),
+            'status' => $kegiatan->is_berbayar ? 'pending' : 'confirmed',
+            'ticket_code' => $kegiatan->is_berbayar ? null : (string) Str::uuid(),
         ]);
 
         Inertia::flash('toast', [
