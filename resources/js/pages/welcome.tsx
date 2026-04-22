@@ -1,9 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { CalendarDays, MapPin, ArrowRight, ImageOff, LogIn, UserPlus } from 'lucide-react';
+import { CalendarDays, MapPin, ArrowRight, LogIn, UserPlus } from 'lucide-react';
 import { login, register } from '@/routes';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import AppLogo from '@/components/app-logo';
+import EventCardBanner from '@/components/user/event-card-banner';
 
 type KegiatanPreview = {
     id: number;
@@ -17,45 +18,18 @@ type KegiatanPreview = {
     banner_url: string | null;
 };
 
-function formatRupiah(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-    }).format(amount);
-}
-
 function EventCard({ kegiatan }: { kegiatan: KegiatanPreview }) {
     return (
         <Link
             href={`/kegiatan/${kegiatan.id}`}
-            className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-left shadow-sm transition-shadow hover:shadow-md"
+            className="group border-sidebar-border/70 dark:border-sidebar-border flex flex-col overflow-hidden rounded-xl border bg-card text-left shadow-sm transition-shadow hover:shadow-md"
         >
-            <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                {kegiatan.banner_url ? (
-                    <img
-                        src={kegiatan.banner_url}
-                        alt={kegiatan.judul}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground/40">
-                        <ImageOff className="h-8 w-8" />
-                        <span className="text-xs">Tidak ada banner</span>
-                    </div>
-                )}
-                <div className="absolute top-2.5 left-2.5">
-                    {kegiatan.is_berbayar ? (
-                        <span className="rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                            💳 {kegiatan.harga ? formatRupiah(kegiatan.harga) : 'Berbayar'}
-                        </span>
-                    ) : (
-                        <span className="rounded-full bg-emerald-500/90 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-                            🎟️ Gratis
-                        </span>
-                    )}
-                </div>
-            </div>
+            <EventCardBanner
+                bannerUrl={kegiatan.banner_url}
+                title={kegiatan.judul}
+                isBerbayar={kegiatan.is_berbayar}
+                harga={kegiatan.harga}
+            />
 
             <div className="flex flex-1 flex-col gap-2 p-4">
                 <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{kegiatan.judul}</h3>
