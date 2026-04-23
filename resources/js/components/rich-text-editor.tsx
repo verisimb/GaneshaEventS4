@@ -52,7 +52,7 @@ export function RichTextEditor({ value, onChange, placeholder = 'Tulis deskripsi
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm dark:prose-invert max-w-none min-h-[180px] px-3 py-2 focus:outline-none',
+                class: 'rich-content min-h-[180px] px-3 py-2 focus:outline-none',
             },
         },
     });

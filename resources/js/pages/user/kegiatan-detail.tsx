@@ -130,7 +130,7 @@ export default function KegiatanDetail({
                         <h3 className="mb-3 text-base font-semibold">Deskripsi Kegiatan</h3>
                         {kegiatan.deskripsi ? (
                             <div 
-                                className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground"
+                                className="rich-content max-w-none text-muted-foreground"
                                 dangerouslySetInnerHTML={{ __html: kegiatan.deskripsi }}
                             />
                         ) : (

@@ -141,3 +141,41 @@
         @apply bg-background text-foreground;
     }
 }
+
+@layer components {
+    .rich-content {
+        @apply max-w-none text-sm leading-relaxed;
+    }
+
+    .rich-content h1 {
+        @apply mt-5 text-2xl font-bold;
+    }
+
+    .rich-content h2 {
+        @apply mt-4 text-xl font-semibold;
+    }
+
+    .rich-content h3 {
+        @apply mt-4 text-lg font-semibold;
+    }
+
+    .rich-content p + p {
+        @apply mt-4;
+    }
+
+    .rich-content ul {
+        @apply mt-3 list-disc space-y-1 pl-6;
+    }
+
+    .rich-content ol {
+        @apply mt-3 list-decimal space-y-1 pl-6;
+    }
+
+    .rich-content li > p {
+        @apply inline;
+    }
+
+    .rich-content blockquote {
+        @apply mt-4 border-l-4 border-border pl-4 italic;
+    }
+}
